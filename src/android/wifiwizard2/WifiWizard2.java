@@ -54,17 +54,21 @@ public class WifiWizard2 extends CordovaPlugin {
     private static final String GET_CONNECTED_NETWORKID = "getConnectedNetworkID";
     private static final String IS_WIFI_ENABLED = "isWifiEnabled";
     private static final String SET_WIFI_ENABLED = "setWifiEnabled";
+    private static final String BIND_WIFI = "androidBindWiFi";
+    private static final String UNBIND_WIFI = "androidUnBindWiFi";
     private static final String TAG = "WifiWizard2";
     private static final int    API_VERSION = VERSION.SDK_INT;
     private static final String SCAN = "scan";
 
     private WifiManager wifiManager;
+    private ConnectivityManager connectivityManager;
     private CallbackContext callbackContext;
 
     @Override
     public void initialize(CordovaInterface cordova, CordovaWebView webView) {
         super.initialize(cordova, webView);
         this.wifiManager = (WifiManager) cordova.getActivity().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        this.connectivityManager = (ConnectivityManager) cordova.getActivity().getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
     }
 
     @Override
@@ -125,6 +129,12 @@ public class WifiWizard2 extends CordovaPlugin {
         }
         else if(action.equals(GET_CONNECTED_NETWORKID)) {
             this.getConnectedNetworkID(callbackContext);
+        }
+        else if(action.equals(UNBIND_WIFI)) {
+            this.androidUnBindWiFi(callbackContext);
+        }
+        else if(action.equals(BIND_WIFI)) {
+            this.androidBindWiFi(callbackContext);
         }
         else {
             callbackContext.error("Incorrect action parameter: " + action);
@@ -478,6 +488,29 @@ public class WifiWizard2 extends CordovaPlugin {
             Log.d(TAG, e.getMessage());
             return false;
         }
+    }
+
+    private boolean androidBindWiFi(CallbackContext callbackContext) {
+                // Get a list of all networks
+        for(Network network : connectivityManager.getAllNetworks()) {
+            NetworkInfo info = connectivityManager.getNetworkInfo(network);
+            if(info.getType() == ConnectivityManager.TYPE_WIFI)
+            {
+                // Bind to this network
+                boolean result = connectivityManager.bindProcessToNetwork(network);
+                callbackContext.success("Bound To WiFi");
+                return true;
+            }
+        }
+
+        callbackContext.error("No WiFi Network");
+        return false;
+    }
+
+    private boolean androidUnBindWiFi(CallbackContext callbackContext) {
+        connectivityManager.bindProcessToNetwork(null);
+        callbackContext.success("Unbound From WiFi");
+        return true;
     }
 
     /**

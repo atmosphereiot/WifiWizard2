@@ -217,6 +217,14 @@ var WifiWizard2 = {
         cordova.exec(win, fail, "WifiWizard2", "removeNetwork", [WifiWizard2.formatWifiString(SSID)]);
     },
 
+    androidBindWifi: function (win, fail) {
+        cordova.exec(win, fail, "WifiWizard2", "androidBindWiFi", []);
+    },
+
+    androidUnBindWifi: function (win, fail) {
+        cordova.exec(win, fail, "WifiWizard2", "androidUnBindWiFi", []);
+    },
+
     /**
      * Connect to SSID on Android Device
      * @param SSID
